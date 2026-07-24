@@ -26,3 +26,7 @@ dev = [
 [tool.setuptools]
 packages = ["babalegba"]
 include-package-data = true
+
+# Frappe Cloud compatibility: Define Frappe version dependency
+[tool.bench.frappe-dependencies]
+frappe = ">=16.0.0"
