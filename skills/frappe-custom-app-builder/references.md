@@ -107,9 +107,11 @@ Fetch a license text the same way bench does (for example when changing the lice
 
 When changing the license later, update all three places together: license.txt, app_license in hooks.py, and the License section of the README.
 
-## Connecting to a Remote That Already Has Commits
+## Existing Repository Content
 
-Hosting services often create the repository with a README commit. Commit the scaffold on top of it instead of force-pushing:
+Apply the option in Phase 3. Push only in Phase 6, after verification: a normal git push origin $B for options 1 and 2, the guarded force-push below for option 3.
+
+Set up the remote first (all options):
 
 ```bash
 cd <app_repo>
@@ -117,12 +119,56 @@ git config user.name "<Name>"
 git config user.email "<work email>"
 git remote add origin <repo_url>
 git fetch origin
-git reset --soft origin/develop
-git add -A
+B=develop   # the agreed push target
+```
+
+Show the initiator what exists before asking intake D2:
+
+```bash
+git branch -r
+git rev-list --count origin/$B
+git ls-tree -r --name-only origin/$B
+git ls-remote --tags origin
+```
+
+### Option 1: Add on top (keep existing files)
+
+The scaffold commit goes on top of the existing history. Files that exist only in the remote are kept. Files that exist in both are listed; by default the scaffold version wins, so ask per file first.
+
+```bash
+git reset --soft origin/$B
+git ls-tree -r --name-only origin/$B | sort > /tmp/remote_files
+git ls-files | sort > /tmp/scaffold_files
+comm -12 /tmp/remote_files /tmp/scaffold_files            # in both: ask per file
+comm -23 /tmp/remote_files /tmp/scaffold_files | while IFS= read -r f; do git checkout origin/$B -- "$f"; done
+# to keep the existing version of a file that is in both: git checkout origin/$B -- <file>
 git commit -m "feat: Initialize App"
 ```
 
-The scaffold's README replaces the hosting service's placeholder README in the same commit.
+Existing files must still fit the app layout (pyproject.toml at the root, package in <app_name>/). Report any that conflict with it.
+
+### Option 2: Wipe content, keep history
+
+One commit removes every existing file and adds the scaffold. No force-push.
+
+```bash
+git reset --soft origin/$B
+git add -A
+git commit -m "feat: Initialize App"
+git show --stat HEAD      # shows the removed files; include them in the report
+```
+
+### Option 3: Wipe content and history
+
+The branch is replaced by the scaffold's own history. Nothing to do in Phase 3 beyond recording the commit being replaced. In Phase 6, after the final confirmation: optional backup tag first, then a force-push guarded against concurrent changes:
+
+```bash
+OLD=$(git rev-parse origin/$B)     # record in Phase 3 and show to the initiator
+git push origin "$OLD:refs/tags/backup/pre-init-$(date +%Y%m%d)"   # only if agreed
+git push --force-with-lease=$B:$OLD origin $B
+```
+
+Repeat per branch that was agreed to be wiped. Protected branches reject this until an administrator allows force-pushes. Other branches keep their old commits unless they are wiped too.
 
 ## Commands
 

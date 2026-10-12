@@ -4,7 +4,7 @@ Walk through every item before reporting the app as initialized. Mark items that
 
 ## Intake
 
-- [ ] Groups A, B and C were answered explicitly by the initiator.
+- [ ] Groups A, B and C, and D2 for a non-empty repository, were answered explicitly by the initiator.
 - [ ] Defaults used for groups D, E and F were stated and accepted.
 - [ ] The initiator confirmed the filled intake record.
 
@@ -12,7 +12,8 @@ Walk through every item before reporting the app as initialized. Mark items that
 
 - [ ] Generated with bench new-app on a bench of the target major version.
 - [ ] pyproject.toml is at the repository root; the app package is in <app_name>/ below it.
-- [ ] Commit "feat: Initialize App" sits on top of the existing remote history; nothing was force-pushed.
+- [ ] The initiator saw the existing repository content and chose how to handle it (D2), or the repository was empty.
+- [ ] Commit "feat: Initialize App" was applied as chosen: on top with per-file decisions, wipe with history kept, or wipe including history.
 - [ ] Commits carry the agreed git author identity, not a hostname-based email.
 
 ## Hardening
@@ -38,7 +39,8 @@ Walk through every item before reporting the app as initialized. Mark items that
 
 ## Publishing and Handover
 
-- [ ] Push target confirmed by the initiator; pushed without force.
+- [ ] Push target confirmed by the initiator.
+- [ ] Force-push used only for "Wipe content and history", with --force-with-lease, after the agreed backup tag and a final confirmation; otherwise no force-push.
 - [ ] Remote branch matches the local branch.
 - [ ] Frappe Cloud path is clear: GitHub repository or mirror exists, or the follow-up is listed.
 - [ ] Handover report lists outcome, recorded decisions, deviations and follow-ups for administrators.

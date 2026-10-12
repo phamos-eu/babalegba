@@ -13,7 +13,7 @@ Initialize a new Frappe / ERPNext custom app that installs cleanly on a local be
 2. **Never hand-write the scaffold.** Always generate it with bench new-app from a bench of the target major version. The scaffold differs between v15 and v16, and hand-written scaffolds repeatedly fail on Frappe Cloud (wrong pyproject location, missing package subdirectory, missing version table).
 3. **bench new-app is not the finish line.** Its output is not Frappe-Cloud-ready and leaves placeholders behind. Always apply the hardening steps in Phase 4.
 4. **Verify on a real site before publishing.** Install the app on a site of the target version, with the required apps, before anything is pushed.
-5. **Respect what is already in the remote.** Build on top of existing remote history. Never force-push, never delete remote branches or files without asking.
+5. **The initiator decides what happens to existing repository content.** Show what is there, then let them choose: add on top, wipe content but keep history, or wipe content and history. Never delete, overwrite or force-push without that explicit decision.
 6. **Record the decisions in the repository.** The intake answers go into the app README so the next developer (human or AI) does not have to rediscover them.
 
 ## Process Overview
@@ -44,8 +44,8 @@ Use intake-questionnaire.md. Rules:
 
 - Ask in as few rounds as possible, grouped by topic. If the environment offers a structured question tool, use it; otherwise ask in one numbered message.
 - For every question, offer the proposed default discovered in Phase 0 and say where it came from. The initiator may accept all defaults of a group at once.
-- Groups A (identity), B (ownership, contact, license) and C (platform) are blocking. Do not scaffold before they are answered.
-- Groups D, E and F may fall back to the stated defaults if the initiator explicitly says so.
+- Groups A (identity), B (ownership, contact, license) and C (platform) are blocking, and so is D2 (existing repository content) whenever the repository is not empty. Do not scaffold before they are answered.
+- The rest of groups D, E and F may fall back to the stated defaults if the initiator explicitly says so.
 - Never decide the license yourself. Explain the options neutrally; if the initiator is unsure, recommend they ask whoever owns the commercial or legal relationship.
 - End the phase by writing the filled intake record (template at the end of intake-questionnaire.md) back to the initiator and asking for confirmation. Only an explicit confirmation opens Phase 2.
 
@@ -56,7 +56,8 @@ Stop and report if any check fails; propose the fix, do not improvise around it.
 - The chosen bench runs the target major version (for example frappe 16.x for a v16 app).
 - Every required app (ERPNext, HRMS, …) is present in that bench and installed on the verification site.
 - The app name is a valid Python identifier, lowercase, and not already used: not a folder in the bench's apps directory, not importable in the bench's Python environment, not the name of a well-known Frappe app.
-- The remote repository is reachable with the current credentials (git ls-remote) and its current content is known.
+- The remote repository is reachable with the current credentials (git ls-remote), its current content matches what was shown to the initiator for D2, and nothing was pushed to it since.
+- If D2 is "Wipe content and history" on a protected branch: force-pushing has been allowed by an administrator, or the blocker is reported.
 - If the license text will be fetched by bench (it calls the GitHub license API), network access to api.github.com works. Offline, bench writes "No license text found" into license.txt.
 - If the target is Frappe Cloud and the repository is not on GitHub: the initiator has confirmed how Frappe Cloud will get the code (see references.md, Frappe Cloud section).
 
@@ -66,7 +67,7 @@ Stop and report if any check fails; propose the fix, do not improvise around it.
 2. bench new-app also installs the app into the bench environment, builds its assets and creates a local git repository with a first commit "feat: Initialize App".
 3. If the organization keeps app repositories outside the bench (intake E2), move the folder there and replace it with a symlink in the bench's apps directory.
 4. Set the git author identity for this repository from intake B5. Do not rely on a global identity; an unset one produces hostname-based author emails.
-5. Connect the remote. If the remote already has commits, rebase the scaffold onto them without rewriting the remote: fetch, soft-reset the local branch onto the remote branch, and commit the scaffold on top. The commit message stays "feat: Initialize App".
+5. Connect the remote and apply the decision from intake D2 exactly as described in references.md, section "Existing Repository Content". The commit message stays "feat: Initialize App". For "Add on top", show the files that exist in both versions and apply the per-file decision before committing.
 
 ## Phase 4 — Harden (what bench new-app does not do)
 
@@ -78,7 +79,7 @@ Each item is its own small change; commit them together as a chore or fix commit
 - **H4 Required apps.** Set required_apps in hooks.py for every hard dependency (for example ["erpnext"]).
 - **H5 License consistency.** license.txt contains the full text of the chosen license, not "No license text found" and not unfilled placeholders such as [year] [fullname] (the MIT text from the GitHub API has them). hooks.py app_license uses the matching lowercase SPDX key. For a proprietary app, write the license.txt by hand with the copyright notice agreed in intake.
 - **H6 README.** Replace the placeholder install URL with the real repository URL and branch, use bench --site $SITE install-app, state the supported Frappe/ERPNext versions, write the license as a readable sentence, and add a "Project facts" section with the confirmed intake record (no secrets, no personal data beyond the agreed contact).
-- **H7 Repository templates.** Add the organization's MR/PR template (GitLab: .gitlab/merge_request_templates/, GitHub: .github/pull_request_template.md). Add CI only as agreed in intake D3; do not keep a GitHub Actions workflow in a GitLab-only repository.
+- **H7 Repository templates.** Add the organization's MR/PR template (GitLab: .gitlab/merge_request_templates/, GitHub: .github/pull_request_template.md). Add CI only as agreed in intake D4; do not keep a GitHub Actions workflow in a GitLab-only repository.
 - **H8 Lint and format standard.** If agreed (intake F3), apply the organization's lint, format and type-check standard as its own "chore:" commit, configuration only, no code reformatting in the same commit.
 - **H9 Validation of pyproject.toml.** Parse it with Python's tomllib and print the frappe-dependencies table to prove it is valid TOML.
 
@@ -97,9 +98,10 @@ If a step fails, fix the cause in the app and repeat; do not push a failing app.
 
 ## Phase 6 — Publish
 
-- Show the initiator the local commit list and the push target (remote, branch). Pushing is an outward-facing action: get confirmation unless the initiator already approved this exact target in intake D2.
+- Show the initiator the local commit list and the push target (remote, branch). Pushing is an outward-facing action: get confirmation unless the initiator already approved this exact target in intake D3.
 - Push to the agreed working branch. If that branch is protected, push a feature branch and open a merge/pull request instead.
-- Never force-push. Never change the default branch, branch protection or repository visibility yourself; list them as follow-ups if the intake asks for something different from the current settings.
+- Force-push only when intake D2 is "Wipe content and history", only to the agreed branches, only with --force-with-lease against the commit shown to the initiator, after the backup tag if one was agreed, and after the final confirmation. In every other case never force-push.
+- Never change the default branch, branch protection or repository visibility yourself; list them as follow-ups if the intake asks for something different from the current settings.
 - Frappe Cloud: the app is added in a private bench group from GitHub. If the code lives elsewhere, a GitHub mirror is needed first (references.md).
 
 ## Phase 7 — Handover

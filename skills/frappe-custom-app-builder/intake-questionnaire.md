@@ -59,7 +59,7 @@ Changing a license after code has been distributed does not revoke the old licen
 Points to raise:
 
 - An app that imports and extends ERPNext code may be considered a derivative work of GPL v3 software when it is distributed. If the app is distributed outside the organization or the client, recommend checking license compatibility with whoever handles legal matters.
-- The license should be consistent with repository visibility (A4, D5): a public repository with a proprietary license is unusual and should be confirmed.
+- The license should be consistent with repository visibility (A4, D6): a public repository with a proprietary license is unusual and should be confirmed.
 
 ### B4 Copyright notice
 
@@ -99,25 +99,46 @@ Will the app be installed on a site that already has data? Are there Custom Fiel
 
 ---
 
-## Group D — Repository and workflow (defaultable)
+## Group D — Repository and workflow (defaultable, except D2)
 
 ### D1 Repository host and URL
 
-GitLab (which instance, which group) or GitHub (which organization)? Does the repository exist already? If yes, what is in it (often only a README created by the hosting service)? The scaffold is committed on top of existing history.
+GitLab (which instance, which group) or GitHub (which organization)? Does the repository exist already, or should the initiator create it?
 
-### D2 Branch model and push target
+### D2 Existing repository content (blocking if the repository is not empty)
+
+Never decide this yourself. First show the initiator what is there: branches, number of commits per branch, the file list of the target branch, tags, and open merge/pull requests if they can be read. Then ask which of these to do:
+
+| Option | Result | Needs force-push |
+|---|---|---|
+| Add on top | Existing history and files are kept. The scaffold is committed on top. Files that exist in both are listed; the initiator decides per file whether the scaffold version or the existing version wins. | No |
+| Wipe content, keep history | One commit on top of the existing history removes every existing file and adds the scaffold. Old content stays recoverable from history. | No |
+| Wipe content and history | The target branch is replaced by the scaffold's own history. Old commits disappear from that branch. | Yes |
+
+For "Wipe content and history" also ask:
+
+- Which branches are affected? Other branches (often main) keep the old commits unless they are wiped too.
+- Should a backup tag of the old state be pushed first (for example backup/pre-init-<date>)? Recommend yes unless the content must truly disappear; the decision is the initiator's.
+- Protected branches reject force-pushes. Who will temporarily allow it? Changing protection is an administrator action, not part of this skill.
+- Collaborators with existing clones must re-clone or reset afterwards. Who informs them?
+
+Immediately before the force-push, confirm once more, naming remote, branch and the commit being replaced.
+
+When the only content is a README commit created by the hosting service, "Wipe content, keep history" is a reasonable proposed default, because the scaffold replaces that README anyway. Still ask.
+
+### D3 Branch model and push target
 
 Default (Phamos): work on develop, main is protected. Which branch receives the first push? Direct push or merge/pull request? Should the default branch be changed (only an administrator should do that)?
 
-### D3 Continuous integration
+### D4 Continuous integration
 
 None, GitHub Actions (bench new-app can generate a unit-test workflow, only useful on GitHub), or GitLab CI. Default: whatever sibling apps on the same host use.
 
-### D4 Merge/pull request template
+### D5 Merge/pull request template
 
 Default: copy the organization's template from a sibling repository.
 
-### D5 Visibility
+### D6 Visibility
 
 Private, internal or public. Must fit the license (B3) and the client's confidentiality expectations. Changing visibility is an administrator action, not part of this skill.
 
@@ -186,6 +207,7 @@ Fill this in, show it to the initiator for confirmation, and later add it to the
 | Required apps | <erpnext, …> |
 | Deployment | <Frappe Cloud private bench group / self-hosted / Docker> |
 | Repository | <URL>, work branch <develop>, default branch <main> |
+| Existing content | <empty / added on top / wiped, history kept / wiped incl. history (backup tag: …)> |
 | Frappe Cloud source | <GitHub repo or mirror, or n/a> |
 | CI | <none / GitLab CI / GitHub Actions> |
 | Languages | <de, en> |
