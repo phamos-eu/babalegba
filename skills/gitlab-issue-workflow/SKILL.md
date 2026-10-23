@@ -1,0 +1,148 @@
+---
+name: gitlab-issue-workflow
+description: Take a GitLab issue in a phamos repo from "shall we work on this?" through grill, child items, develop MRs, code review, testing, the production cherry-pick MR, tag and GitLab release, with one status label at a time. Use when working on, triaging, grilling, releasing or labeling a GitLab issue in a phamos repo.
+---
+
+# GitLab issue workflow
+
+One routine for every issue, from the first question to the production OK. It keeps one status label per issue, so anyone can see where an issue stands.
+
+Roles:
+- **PM**: the user. Decides, answers the grill, tests, deploys, merges to production, gives the final OK.
+- **Agent**: you. Writes issues and MRs, builds, reviews, merges to develop, cherry-picks, tags, releases.
+
+Before you start in a repo, read its profile in `repos.md`. A repo without a profile: ask the PM once for the branch, version and release details, then add a profile there.
+
+Templates for child items, MRs and release notes are in `templates.md`.
+
+## Writing style
+
+Issues, MRs, comments and release notes:
+- plain, direct English; short sentences
+- lists over long paragraphs
+- name the code (files, functions) and the MRs and issues by reference
+
+## Labels
+
+**Status labels.** An issue has exactly one at a time:
+
+| Label | Means |
+|---|---|
+| Working | someone works on it: grill, or build of the develop MR |
+| Ready for Dev | child item is fully specified, no open questions; ready to build |
+| PM Review | a review finding needs a PM decision |
+| Testing | merged to develop; PM tests locally, then on the hosted develop site |
+| Ready for Production | PM gave the OK; goes into the production MR |
+| Testing on Production | merged to the production branch, tagged and released; PM checks it on production |
+
+Setting a new status label **removes the old one in the same call**. Never leave two.
+
+**Markers** sit next to a status:
+- **Discussion**: open questions; the grill runs
+- **P:1**, **P:2**, **P:3**: priority
+- **On Hold**: parked; always with a comment giving the reason
+
+Labels not in these lists (for example "Ready for Staging", "Ready for Release", "Testing on Staging") are not used by this routine. Don't set them; remove them when you set a status from this routine.
+
+**Linked issues.** Issues linked to a child item (for example review findings split out of it) carry the same status label as that child and close with it.
+
+## The routine
+
+| Step | Parent | Children | Who |
+|---|---|---|---|
+| 1. "Shall we work on this?" | Yes: assign the PM, **Working** + Discussion. No: ask whether to set **On Hold** (with a reason) or leave it as it is | — | PM |
+| 2. Grill | Working + Discussion | Created from the child template, no open questions, one MR each → **Ready for Dev**. Ships later or stands alone → a related issue in the same milestone instead | PM answers, agent writes |
+| 2b. Consistency check | — | After each new child: check it against the parent and the other children; name conflicts right away. A final pass before the grill closes. A changed child loses Ready for Dev until the PM confirms it again; note the change in its thread | both |
+| 3. Grill closed | remove Discussion | — | PM confirms |
+| 4. Build | Working | **Working** while its develop MR is built. Needs a test that fails without the change | agent |
+| 5. Review | — | `senior-code-reviewer`. Mechanical fixes: apply them. Fixes that need a decision: **PM Review** + grill in the child's thread, then fix or split into issues | agent / PM |
+| 6. Merge to develop | — | Agent merges (see merge rules) → **Testing** | agent |
+| 7. All children merged | **Testing**. PM tests locally, then: "please deploy the hosted develop site". The thread says which stage it is in | — | PM tests and deploys |
+| 8. PM's OK | **Ready for Production** | **Ready for Production** | PM |
+| 9. Production MR | Cherry-pick every child's develop merge in order, version bump, assigned to the PM, senior review | — | agent; PM merges |
+| 10. After the PM's merge | **Testing on Production**; annotated tag + GitLab release | **Testing on Production** + closed | agent |
+| 11. PM's OK on production | closed, keeps its label | — | agent, on the PM's OK |
+
+A small issue with no children runs the child column on the issue itself.
+
+### Step 1: shall we work on this?
+
+Ask the PM in one line. Don't start the grill before a yes.
+
+### Step 2: grill rules
+
+- **One question at a time.** Give your recommendation with each question.
+- Check the code before asking. Questions the code answers are not questions; write the answer into "Where we are" instead.
+- Write each child as soon as its part is settled. Use the child template in `templates.md`.
+- A child has **no open questions** and maps to **one develop MR**. If it needs two MRs, it is two children.
+- **Child or related issue?** Child: it ships with the parent and the parent is not done without it. Related issue in the same milestone: it can ship later, or it stands on its own.
+- Set Ready for Dev on a child only when it is complete.
+
+### Step 2b: consistency check
+
+After each new or changed child:
+- compare it with the parent and every other child: same field names, same rules, no overlap, no gaps
+- name a conflict to the PM right away; don't fix it silently
+- a child that changes after Ready for Dev loses the label until the PM confirms it again; say what changed in its thread
+
+Before the grill closes, do one final pass over all children together.
+
+### Step 4: build
+
+- One branch and one develop MR per child, from the develop MR template.
+- Every MR has a test that fails without the change. Say in the MR that you checked it.
+
+### Step 5: PM Review threshold
+
+Run `senior-code-reviewer` on the MR.
+
+Apply without asking: mechanical fixes (bugs with one clear fix, missing tests, naming, dead code, comments).
+
+Set **PM Review** and grill in the child's thread when the fix needs a decision:
+- UX or wording the user sees
+- data model (new fields, doctypes, migrations of existing data)
+- permissions and who can see what
+- money or tax
+- legal or privacy
+- choosing between options
+
+Then fix it in the MR or split it into a linked issue.
+
+### Step 6: merge rules (develop)
+
+Merge a develop MR only when:
+- the review passed
+- the tests are green
+- every finding is fixed or split into a linked issue
+
+Then set the child to **Testing**.
+
+### Step 9: production MR
+
+Follow the repo profile in `repos.md`: branch name, cherry-pick command, conflict rules, version file, how to test.
+- Cherry-pick every child's develop merge, in merge order.
+- Version bump: **minor** if the release needs `bench migrate` (new fields, patches), otherwise **patch**.
+- Use the production MR template in `templates.md`. Assign it to the PM.
+- Run `senior-code-reviewer` on it. Fix findings on develop first, then cherry-pick the fix.
+- **Never merge the production MR.** The PM merges it.
+
+### Step 10: tag and release
+
+After the PM's merge:
+- annotated tag on the merge commit, as the profile says
+- GitLab release from the release notes template
+- parent → Testing on Production (stays open); children and their linked issues → Testing on Production + closed, each with a short comment naming the MR and release
+
+## Comment rules
+
+- If the PM started a thread on the topic, **reply in that thread**.
+- **One topic per comment**, so each can be resolved on its own.
+- Every label change gets a short comment: what changed and why, with the MR or release.
+
+## Closing rules
+
+- **Ask before closing** any issue. Merged to develop is not done.
+- Exceptions:
+  - step 10: children and their linked issues close once their code is merged to the production branch and released
+  - step 11: close the parent on the PM's OK on production
+- A closed issue keeps its last status label.
