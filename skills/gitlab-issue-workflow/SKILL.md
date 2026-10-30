@@ -91,6 +91,7 @@ Before the grill closes, do one final pass over all children together.
 ### Step 4: build
 
 - One branch and one develop MR per child, from the develop MR template.
+- The MR is linked to its child issue (see "Linking MRs to issues").
 - Every MR has a test that fails without the change. Say in the MR that you checked it.
 
 ### Step 5: PM Review threshold
@@ -137,6 +138,7 @@ Merge a develop MR only when:
 - the tests are green
 - every finding is fixed or split into a linked issue
 - the PM gave the OK on the local test (step 5b)
+- the MR is linked to its issue and shows up on it
 
 Then set the child to **Testing**.
 
@@ -146,6 +148,7 @@ Follow the repo profile in `repos.md`: branch name, cherry-pick command, conflic
 - Cherry-pick every child's develop merge, in merge order.
 - Version bump: **minor** if the release needs `bench migrate` (new fields, patches), otherwise **patch**.
 - Use the production MR template in `templates.md`. Assign it to the PM.
+- Link it to the parent and every child (see "Linking MRs to issues").
 - Run `senior-code-reviewer` on it. Fix findings on develop first, then cherry-pick the fix.
 - **Never merge the production MR.** The PM merges it.
 
@@ -155,6 +158,18 @@ After the PM's merge:
 - annotated tag on the merge commit, as the profile says
 - GitLab release from the release notes template
 - parent → Testing on Production (stays open); children and their linked issues → Testing on Production + closed, each with a short comment naming the MR and release
+
+## Linking MRs to issues
+
+Every MR belongs to an issue. The issue then lists its MRs, and anyone can trace a change back to the decision behind it.
+
+- **No issue, no MR.** Know the MR's issue before opening it: the child for a develop MR; the parent and all children for the production MR. No issue yet: ask the PM whether to create one first.
+- **Link it in the MR**, as the templates show:
+  - issue number in the title: `(#<issue>)`
+  - full reference under "Related issue(s)/ticket(s)": `<group>/<repo>#<issue>`, plus any linked issues split out of review findings
+- **No closing keywords** (`Closes`, `Fixes`, `Resolves`, `Implements`) in the title, description or commits. They close the issue on merge to the default branch and skip the closing rules below.
+- **Check the link** right after creating the MR: read the issue's related merge requests. MR missing there: add a comment on the issue naming the MR, in the topic's thread if there is one (see comment rules).
+- An MR that is not linked is not merged.
 
 ## Comment rules
 

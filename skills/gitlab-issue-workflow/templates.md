@@ -2,6 +2,8 @@
 
 Fill every section. Leave out a section only where it says "optional". Plain, direct English, short sentences, lists over paragraphs.
 
+Every MR names its issue in the title and under "Related issue(s)/ticket(s)" with the full reference (`<group>/<repo>#<issue>`). Never `Closes`, `Fixes`, `Resolves` or `Implements`: they close the issue on merge.
+
 ## Child item (issue description)
 
 Shape of phamos/phamos#1665.
