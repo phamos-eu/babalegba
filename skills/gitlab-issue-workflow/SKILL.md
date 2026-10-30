@@ -120,7 +120,7 @@ Start once the review is done and the tests are green.
    - Fetch and check out the MR branch, then `bench --site <site> migrate`, `bench build --app <app>`, `bench --site <site> clear-cache`.
    - If a git command fails because files can't be deleted, request delete permission for the bench folder once, saying it is needed for the branch switch.
    - If the computer isn't reachable, post the same commands in the MR comment so the PM can run them.
-2. **Hand over** with one MR comment: "Ready for your local test on `<site>`", the branch name, and the MR's "To test locally" checklist (see the develop MR template). The checklist is for a user clicking through the app: page, action, expected result. No code.
+2. **Hand over** with one MR comment (a reply in the MR's local-test thread if one exists, so every test round stays in one thread): "Ready for your local test on `<site>`", the branch name, and the MR's "To test locally" checklist (see the develop MR template). The checklist is for a user clicking through the app: page, action, expected result. No code.
 3. **The PM tests.** The child stays **Working**; this stage has no label of its own.
    - Problem found: fix it on the same branch, rerun the tests (and the review if the fix is more than mechanical), update the bench, ask again.
    - PM's OK: note it in the MR thread, then go to step 6.

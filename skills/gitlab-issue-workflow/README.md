@@ -11,7 +11,7 @@ A reusable AI agent skill that takes a GitLab issue in a phamos repo through one
 
 ## Files
 
-- SKILL.md: the routine, label rules, grill rules, review threshold, merge, comment and closing rules.
+- SKILL.md: the routine, label rules, grill rules, review threshold, local test, merge, comment and closing rules.
 - repos.md: one profile per repo: branches, cherry-pick and conflict rules, version file, tests, tag and release. Starts with phamos/phamos.
 - templates.md: child item, develop MR, production MR and release notes templates.
 
