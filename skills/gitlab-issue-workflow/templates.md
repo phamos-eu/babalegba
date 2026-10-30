@@ -2,7 +2,7 @@
 
 Fill every section. Leave out a section only where it says "optional". Plain, direct English, short sentences, lists over paragraphs.
 
-Every MR names its issue in the title and under "Related issue(s)/ticket(s)" with the full reference (`<group>/<repo>#<issue>`). Never `Closes`, `Fixes`, `Resolves` or `Implements`: they close the issue on merge.
+Every MR names its issue in the title and under "Related issue(s)/ticket(s)" with the full reference (`<group>/<repo>#<issue>`). Never `Closes`, `Fixes`, `Resolves` or `Implements`: GitLab would close the issue on merge, and only a human closes issues.
 
 ## Child item (issue description)
 

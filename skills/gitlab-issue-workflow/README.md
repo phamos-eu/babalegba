@@ -8,7 +8,7 @@ A reusable AI agent skill that takes a GitLab issue in a phamos repo through one
 - A local test of each MR branch on the PM's own bench before it is merged to develop.
 - Testing on the hosted develop site, then the production MR by cherry-pick, version bump, annotated tag and GitLab release.
 - One status label per issue at a time (Working, Ready for Dev, PM Review, Testing, Ready for Production, Testing on Production), plus the markers Discussion, P:1–3 and On Hold.
-- Comment rules (read the threads first, reply in the topic's existing thread, new thread only for a new topic) and closing rules (ask first).
+- Comment rules (read the threads first, reply in the topic's existing thread, new thread only for a new topic) and closing rules (only a human closes; every close request is double-checked against an explicit list).
 
 ## Files
 

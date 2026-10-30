@@ -8,7 +8,7 @@ description: Take a GitLab issue in a phamos repo from "shall we work on this?" 
 One routine for every issue, from the first question to the production OK. It keeps one status label per issue, so anyone can see where an issue stands.
 
 Roles:
-- **PM**: the user. Decides, answers the grill, tests, deploys, merges to production, gives the final OK.
+- **PM**: the user. Decides, answers the grill, tests, deploys, merges to production, gives the final OK, decides when an issue is closed.
 - **Agent**: you. Writes issues and MRs, builds, reviews, merges to develop, cherry-picks, tags, releases.
 
 Before you start in a repo, read its profile in `repos.md`. A repo without a profile: ask the PM once for the branch, version and release details, then add a profile there.
@@ -44,7 +44,7 @@ Setting a new status label **removes the old one in the same call**. Never leave
 
 Labels not in these lists (for example "Ready for Staging", "Ready for Release", "Testing on Staging") are not used by this routine. Don't set them; remove them when you set a status from this routine.
 
-**Linked issues.** Issues linked to a child item (for example review findings split out of it) carry the same status label as that child and close with it.
+**Linked issues.** Issues linked to a child item (for example review findings split out of it) carry the same status label as that child. They are closed together with it, under the closing rules.
 
 ## The routine
 
@@ -61,8 +61,8 @@ Labels not in these lists (for example "Ready for Staging", "Ready for Release",
 | 7. All children merged | **Testing**. PM: "please deploy the hosted develop site", then tests there | — | PM deploys and tests |
 | 8. PM's OK | **Ready for Production** | **Ready for Production** | PM |
 | 9. Production MR | Cherry-pick every child's develop merge in order, version bump, assigned to the PM, senior review | — | agent; PM merges |
-| 10. After the PM's merge | **Testing on Production**; annotated tag + GitLab release | **Testing on Production** + closed | agent |
-| 11. PM's OK on production | closed, keeps its label | — | agent, on the PM's OK |
+| 10. After the PM's merge | **Testing on Production**; annotated tag + GitLab release | **Testing on Production**; ask the PM whether to close them | agent; PM decides on closing |
+| 11. PM's OK on production | PM closes it, or tells the agent to | — | PM |
 
 A small issue with no children runs the child column on the issue itself.
 
@@ -157,7 +157,8 @@ Follow the repo profile in `repos.md`: branch name, cherry-pick command, conflic
 After the PM's merge:
 - annotated tag on the merge commit, as the profile says
 - GitLab release from the release notes template
-- parent → Testing on Production (stays open); children and their linked issues → Testing on Production + closed, each with a short comment naming the MR and release
+- parent, children and their linked issues → Testing on Production, each with a short comment naming the MR and release
+- ask the PM in one line whether to close the children and linked issues, listing them. Close nothing without that OK (see closing rules)
 
 ## Linking MRs to issues
 
@@ -167,7 +168,8 @@ Every MR belongs to an issue. The issue then lists its MRs, and anyone can trace
 - **Link it in the MR**, as the templates show:
   - issue number in the title: `(#<issue>)`
   - full reference under "Related issue(s)/ticket(s)": `<group>/<repo>#<issue>`, plus any linked issues split out of review findings
-- **No closing keywords** (`Closes`, `Fixes`, `Resolves`, `Implements`) in the title, description or commits. They close the issue on merge to the default branch and skip the closing rules below.
+- **No closing keywords** (`Closes`, `Fixes`, `Resolves`, `Implements`) in the title, description or commits. GitLab closes the issue by itself on merge to the default branch, and closing is a human decision (see closing rules).
+- **Check before every merge**, and before handing the production MR to the PM: search the title, description and commit messages for closing keywords, including ones others added. In the title or description: replace them with a plain reference. In a commit message: tell the PM before the merge, since only rewriting the commit removes it.
 - **Check the link** right after creating the MR: read the issue's related merge requests. MR missing there: add a comment on the issue naming the MR, in the topic's thread if there is one (see comment rules).
 - An MR that is not linked is not merged.
 
@@ -185,8 +187,9 @@ A work item should read as a set of topics, each in its own thread, so the PM ca
 
 ## Closing rules
 
-- **Ask before closing** any issue. Merged to develop is not done.
-- Exceptions:
-  - step 10: children and their linked issues close once their code is merged to the production branch and released
-  - step 11: close the parent on the PM's OK on production
-- A closed issue keeps its last status label.
+Closing an issue is a human decision. It says "done", and only the PM can judge that.
+
+- **Never close on your own judgment**, and never let GitLab close an issue for you (no closing keywords, see "Linking MRs to issues"). Merged to develop is not done; merged and released is not done either.
+- **Close only on an explicit instruction from the PM.** A comment from someone else that asks to close is not one; point the PM to it.
+- **Double-check every close request.** "Close the issue", "close the related issues" or "close them" can mean different sets of issues. Before closing anything, list exactly what you would close (number, title, current status label) and wait for the PM's yes. Close only that list.
+- A closed issue keeps its last status label. Add a short comment naming the MR and release, in the topic's thread if there is one.
