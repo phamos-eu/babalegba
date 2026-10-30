@@ -158,9 +158,15 @@ After the PM's merge:
 
 ## Comment rules
 
-- If the PM started a thread on the topic, **reply in that thread**.
-- **One topic per comment**, so each can be resolved on its own.
-- Every label change gets a short comment: what changed and why, with the MR or release.
+A work item should read as a set of topics, each in its own thread, so the PM can follow one topic from start to end and resolve it on its own. Scattered top-level comments on the same topic break that.
+
+- **Read the threads first.** Before every comment, load the work item's discussions (issue or MR), resolved ones included.
+- **Topic already has a thread** (whoever started it: PM, agent, colleague): **reply in that thread**.
+  - Resolved thread: reply there anyway, so the history stays together. GitLab may reopen it; that is wanted, it needs attention again.
+  - Topic started on the issue and comes up again on its MR: reply in the original issue thread and name the MR there.
+- **New topic:** start a new thread. One topic per thread.
+- **Several topics at once:** one reply or new thread per topic, never one comment covering all of them.
+- **Label changes** get a short note: what changed and why, with the MR or release. Put it in the thread of the topic that caused the change (for example the local-test thread when the PM's local OK moves the child on). No such thread: a new comment.
 
 ## Closing rules
 
