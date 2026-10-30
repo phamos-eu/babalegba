@@ -1,6 +1,6 @@
 ---
 name: gitlab-issue-workflow
-description: Take a GitLab issue in a phamos repo from "shall we work on this?" through grill, child items, develop MRs, code review, testing, the production cherry-pick MR, tag and GitLab release, with one status label at a time. Use when working on, triaging, grilling, releasing or labeling a GitLab issue in a phamos repo.
+description: Take a GitLab issue in a phamos repo from "shall we work on this?" through grill, child items, develop MRs, code review, a local test of the branch on the PM's own bench before any merge, testing, the production cherry-pick MR, tag and GitLab release, with one status label at a time. Use when working on, triaging, grilling, releasing or labeling a GitLab issue in a phamos repo.
 ---
 
 # GitLab issue workflow
@@ -28,10 +28,10 @@ Issues, MRs, comments and release notes:
 
 | Label | Means |
 |---|---|
-| Working | someone works on it: grill, or build of the develop MR |
+| Working | someone works on it: grill, build of the develop MR, or the PM's local test of the unmerged branch |
 | Ready for Dev | child item is fully specified, no open questions; ready to build |
 | PM Review | a review finding needs a PM decision |
-| Testing | merged to develop; PM tests locally, then on the hosted develop site |
+| Testing | merged to develop; PM tests on the hosted develop site |
 | Ready for Production | PM gave the OK; goes into the production MR |
 | Testing on Production | merged to the production branch, tagged and released; PM checks it on production |
 
@@ -56,8 +56,9 @@ Labels not in these lists (for example "Ready for Staging", "Ready for Release",
 | 3. Grill closed | remove Discussion | — | PM confirms |
 | 4. Build | Working | **Working** while its develop MR is built. Needs a test that fails without the change | agent |
 | 5. Review | — | `senior-code-reviewer`. Mechanical fixes: apply them. Fixes that need a decision: **PM Review** + grill in the child's thread, then fix or split into issues | agent / PM |
-| 6. Merge to develop | — | Agent merges (see merge rules) → **Testing** | agent |
-| 7. All children merged | **Testing**. PM tests locally, then: "please deploy the hosted develop site". The thread says which stage it is in | — | PM tests and deploys |
+| 5b. Local test | — | Stays **Working**. Agent puts the MR branch on the PM's local bench; PM clicks through it. Problems are fixed on the same branch and tested again | agent sets up, PM tests |
+| 6. Merge to develop | — | Agent merges only after the PM's local OK (see merge rules) → **Testing** | agent |
+| 7. All children merged | **Testing**. PM: "please deploy the hosted develop site", then tests there | — | PM deploys and tests |
 | 8. PM's OK | **Ready for Production** | **Ready for Production** | PM |
 | 9. Production MR | Cherry-pick every child's develop merge in order, version bump, assigned to the PM, senior review | — | agent; PM merges |
 | 10. After the PM's merge | **Testing on Production**; annotated tag + GitLab release | **Testing on Production** + closed | agent |
@@ -108,12 +109,34 @@ Set **PM Review** and grill in the child's thread when the fix needs a decision:
 
 Then fix it in the MR or split it into a linked issue.
 
+### Step 5b: local test before merge
+
+The PM should see the change running on their own bench while it is still an open branch. A problem found here is fixed on the same branch in minutes; after the merge it costs a new MR on `develop` and mixes with the other children.
+
+Start once the review is done and the tests are green.
+
+1. **Set up the bench** (agent, on the PM's computer through the linked-computer shell). The bench folder, site and app folder come from the repo profile's "Local bench" block. If the profile has none, ask the PM once and add it.
+   - Note which branch the app folder is on now, and whether it has uncommitted changes. Uncommitted changes: stop and ask the PM. Don't stash or overwrite their work.
+   - Fetch and check out the MR branch, then `bench --site <site> migrate`, `bench build --app <app>`, `bench --site <site> clear-cache`.
+   - If a git command fails because files can't be deleted, request delete permission for the bench folder once, saying it is needed for the branch switch.
+   - If the computer isn't reachable, post the same commands in the MR comment so the PM can run them.
+2. **Hand over** with one MR comment: "Ready for your local test on `<site>`", the branch name, and the MR's "To test locally" checklist (see the develop MR template). The checklist is for a user clicking through the app: page, action, expected result. No code.
+3. **The PM tests.** The child stays **Working**; this stage has no label of its own.
+   - Problem found: fix it on the same branch, rerun the tests (and the review if the fix is more than mechanical), update the bench, ask again.
+   - PM's OK: note it in the MR thread, then go to step 6.
+4. **Restore the bench** after the OK: switch the app folder back to the branch it was on, then migrate, build and clear the cache again, unless the PM says to leave it.
+
+A small issue with no children runs this step on the issue's own MR.
+
+If the develop MR template in `templates.md` has no "To test locally" section yet, add one to the MR anyway, right above "To test (staging)": `**To test locally (<site>, branch <branch>):**`, then numbered steps of the form page → action → expected result, plus any edge case worth trying.
+
 ### Step 6: merge rules (develop)
 
 Merge a develop MR only when:
 - the review passed
 - the tests are green
 - every finding is fixed or split into a linked issue
+- the PM gave the OK on the local test (step 5b)
 
 Then set the child to **Testing**.
 

@@ -89,6 +89,11 @@ Shape of phamos/phamos!999. Title: `<type>(<scope>): <what changes, for the user
 - `<test module>` (<count>), ... pass. They ran with this branch's code against the local bench site `dev.localhost`.
 - <what was not tested>
 
+**To test locally (`<site>`, branch `<branch>`):**
+1. <page to open> → <what to click or enter> → <what you should see>
+2. ...
+- <edge case worth trying, and its expected result>
+
 **To test (staging):**
 1. <step and expected result>
 2. ...

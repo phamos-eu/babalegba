@@ -4,7 +4,8 @@ A reusable AI agent skill that takes a GitLab issue in a phamos repo through one
 
 - "Shall we work on this?", then a grill, one question at a time, that ends in child items with no open questions.
 - One develop MR per child, with a test that fails without the change, a senior code review and a clear line for which findings need a PM decision.
-- Testing on develop, then the production MR by cherry-pick, version bump, annotated tag and GitLab release.
+- A local test of each MR branch on the PM's own bench before it is merged to develop.
+- Testing on the hosted develop site, then the production MR by cherry-pick, version bump, annotated tag and GitLab release.
 - One status label per issue at a time (Working, Ready for Dev, PM Review, Testing, Ready for Production, Testing on Production), plus the markers Discussion, P:1–3 and On Hold.
 - Comment rules (reply in the PM's thread, one topic per comment) and closing rules (ask first).
 
