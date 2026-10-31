@@ -2,6 +2,8 @@
 
 Fill every section. Leave out a section only where it says "optional". Plain, direct English, short sentences, lists over paragraphs.
 
+Every MR names its issue in the title and under "Related issue(s)/ticket(s)" with the full reference (`<group>/<repo>#<issue>`). Never `Closes`, `Fixes`, `Resolves` or `Implements`: GitLab would close the issue on merge, and only a human closes issues.
+
 ## Child item (issue description)
 
 Shape of phamos/phamos#1665.
@@ -88,6 +90,11 @@ Shape of phamos/phamos!999. Title: `<type>(<scope>): <what changes, for the user
 - All <N> fail on the code before this change and pass after it.
 - `<test module>` (<count>), ... pass. They ran with this branch's code against the local bench site `dev.localhost`.
 - <what was not tested>
+
+**To test locally (`<site>`, branch `<branch>`):**
+1. <page to open> → <what to click or enter> → <what you should see>
+2. ...
+- <edge case worth trying, and its expected result>
 
 **To test (staging):**
 1. <step and expected result>

@@ -1,6 +1,6 @@
 ---
 name: gitlab-issue-workflow
-description: Take a GitLab issue in a phamos repo from "shall we work on this?" through grill, child items, develop MRs, code review, testing, the production cherry-pick MR, tag and GitLab release, with one status label at a time. Use when working on, triaging, grilling, releasing or labeling a GitLab issue in a phamos repo.
+description: Take a GitLab issue in a phamos repo from "shall we work on this?" through grill, child items, develop MRs, code review, a local test of the branch on the PM's own bench before any merge, testing, the production cherry-pick MR, tag and GitLab release, with one status label at a time. Use when working on, triaging, grilling, releasing or labeling a GitLab issue in a phamos repo.
 ---
 
 # GitLab issue workflow
@@ -8,7 +8,7 @@ description: Take a GitLab issue in a phamos repo from "shall we work on this?" 
 One routine for every issue, from the first question to the production OK. It keeps one status label per issue, so anyone can see where an issue stands.
 
 Roles:
-- **PM**: the user. Decides, answers the grill, tests, deploys, merges to production, gives the final OK.
+- **PM**: the user. Decides, answers the grill, tests, deploys, merges to production, gives the final OK, decides when an issue is closed.
 - **Agent**: you. Writes issues and MRs, builds, reviews, merges to develop, cherry-picks, tags, releases.
 
 Before you start in a repo, read its profile in `repos.md`. A repo without a profile: ask the PM once for the branch, version and release details, then add a profile there.
@@ -22,16 +22,20 @@ Issues, MRs, comments and release notes:
 - lists over long paragraphs
 - name the code (files, functions) and the MRs and issues by reference
 
+**Issue and MR references are always clickable**, so the PM can open them in one click:
+- **In chat with the PM:** never a bare `#45` or `!12`. Write a Markdown link to the GitLab page, labelled with the full reference: `[phamos/phamos#45](https://git.phamos.eu/phamos/phamos/-/issues/45)`, `[phamos/phamos!12](https://git.phamos.eu/phamos/phamos/-/merge_requests/12)`. Use the host from the repo profile.
+- **Inside GitLab** (issues, MRs, comments, release notes): GitLab links references itself. `#45` and `!12` work within the same project; for another project use the full `<group>/<repo>#45`.
+
 ## Labels
 
 **Status labels.** An issue has exactly one at a time:
 
 | Label | Means |
 |---|---|
-| Working | someone works on it: grill, or build of the develop MR |
+| Working | someone works on it: grill, build of the develop MR, or the PM's local test of the unmerged branch |
 | Ready for Dev | child item is fully specified, no open questions; ready to build |
 | PM Review | a review finding needs a PM decision |
-| Testing | merged to develop; PM tests locally, then on the hosted develop site |
+| Testing | merged to develop; PM tests on the hosted develop site |
 | Ready for Production | PM gave the OK; goes into the production MR |
 | Testing on Production | merged to the production branch, tagged and released; PM checks it on production |
 
@@ -44,7 +48,7 @@ Setting a new status label **removes the old one in the same call**. Never leave
 
 Labels not in these lists (for example "Ready for Staging", "Ready for Release", "Testing on Staging") are not used by this routine. Don't set them; remove them when you set a status from this routine.
 
-**Linked issues.** Issues linked to a child item (for example review findings split out of it) carry the same status label as that child and close with it.
+**Linked issues.** Issues linked to a child item (for example review findings split out of it) carry the same status label as that child. They are closed together with it, under the closing rules.
 
 ## The routine
 
@@ -56,12 +60,13 @@ Labels not in these lists (for example "Ready for Staging", "Ready for Release",
 | 3. Grill closed | remove Discussion | — | PM confirms |
 | 4. Build | Working | **Working** while its develop MR is built. Needs a test that fails without the change | agent |
 | 5. Review | — | `senior-code-reviewer`. Mechanical fixes: apply them. Fixes that need a decision: **PM Review** + grill in the child's thread, then fix or split into issues | agent / PM |
-| 6. Merge to develop | — | Agent merges (see merge rules) → **Testing** | agent |
-| 7. All children merged | **Testing**. PM tests locally, then: "please deploy the hosted develop site". The thread says which stage it is in | — | PM tests and deploys |
+| 5b. Local test | — | Stays **Working**. Agent puts the MR branch on the PM's local bench; PM clicks through it. Problems are fixed on the same branch and tested again | agent sets up, PM tests |
+| 6. Merge to develop | — | Agent merges only after the PM's local OK (see merge rules) → **Testing** | agent |
+| 7. All children merged | **Testing**. PM: "please deploy the hosted develop site", then tests there | — | PM deploys and tests |
 | 8. PM's OK | **Ready for Production** | **Ready for Production** | PM |
 | 9. Production MR | Cherry-pick every child's develop merge in order, version bump, assigned to the PM, senior review | — | agent; PM merges |
-| 10. After the PM's merge | **Testing on Production**; annotated tag + GitLab release | **Testing on Production** + closed | agent |
-| 11. PM's OK on production | closed, keeps its label | — | agent, on the PM's OK |
+| 10. After the PM's merge | **Testing on Production**; annotated tag + GitLab release | **Testing on Production**; ask the PM whether to close them | agent; PM decides on closing |
+| 11. PM's OK on production | PM closes it, or tells the agent to | — | PM |
 
 A small issue with no children runs the child column on the issue itself.
 
@@ -90,6 +95,7 @@ Before the grill closes, do one final pass over all children together.
 ### Step 4: build
 
 - One branch and one develop MR per child, from the develop MR template.
+- The MR is linked to its child issue (see "Linking MRs to issues").
 - Every MR has a test that fails without the change. Say in the MR that you checked it.
 
 ### Step 5: PM Review threshold
@@ -108,12 +114,35 @@ Set **PM Review** and grill in the child's thread when the fix needs a decision:
 
 Then fix it in the MR or split it into a linked issue.
 
+### Step 5b: local test before merge
+
+The PM should see the change running on their own bench while it is still an open branch. A problem found here is fixed on the same branch in minutes; after the merge it costs a new MR on `develop` and mixes with the other children.
+
+Start once the review is done and the tests are green.
+
+1. **Set up the bench** (agent, on the PM's computer through the linked-computer shell). The bench folder, site and app folder come from the repo profile's "Local bench" block. If the profile has none, ask the PM once and add it.
+   - Note which branch the app folder is on now, and whether it has uncommitted changes. Uncommitted changes: stop and ask the PM. Don't stash or overwrite their work.
+   - Fetch and check out the MR branch, then `bench --site <site> migrate`, `bench build --app <app>`, `bench --site <site> clear-cache`.
+   - If a git command fails because files can't be deleted, request delete permission for the bench folder once, saying it is needed for the branch switch.
+   - If the computer isn't reachable, post the same commands in the MR comment so the PM can run them.
+2. **Hand over** with one MR comment (a reply in the MR's local-test thread if one exists, so every test round stays in one thread): "Ready for your local test on `<site>`", the branch name, and the MR's "To test locally" checklist (see the develop MR template). The checklist is for a user clicking through the app: page, action, expected result. No code.
+3. **The PM tests.** The child stays **Working**; this stage has no label of its own.
+   - Problem found: fix it on the same branch, rerun the tests (and the review if the fix is more than mechanical), update the bench, ask again.
+   - PM's OK: note it in the MR thread, then go to step 6.
+4. **Restore the bench** after the OK: switch the app folder back to the branch it was on, then migrate, build and clear the cache again, unless the PM says to leave it.
+
+A small issue with no children runs this step on the issue's own MR.
+
+If the develop MR template in `templates.md` has no "To test locally" section yet, add one to the MR anyway, right above "To test (staging)": `**To test locally (<site>, branch <branch>):**`, then numbered steps of the form page → action → expected result, plus any edge case worth trying.
+
 ### Step 6: merge rules (develop)
 
 Merge a develop MR only when:
 - the review passed
 - the tests are green
 - every finding is fixed or split into a linked issue
+- the PM gave the OK on the local test (step 5b)
+- the MR is linked to its issue and shows up on it
 
 Then set the child to **Testing**.
 
@@ -123,6 +152,7 @@ Follow the repo profile in `repos.md`: branch name, cherry-pick command, conflic
 - Cherry-pick every child's develop merge, in merge order.
 - Version bump: **minor** if the release needs `bench migrate` (new fields, patches), otherwise **patch**.
 - Use the production MR template in `templates.md`. Assign it to the PM.
+- Link it to the parent and every child (see "Linking MRs to issues").
 - Run `senior-code-reviewer` on it. Fix findings on develop first, then cherry-pick the fix.
 - **Never merge the production MR.** The PM merges it.
 
@@ -131,18 +161,39 @@ Follow the repo profile in `repos.md`: branch name, cherry-pick command, conflic
 After the PM's merge:
 - annotated tag on the merge commit, as the profile says
 - GitLab release from the release notes template
-- parent → Testing on Production (stays open); children and their linked issues → Testing on Production + closed, each with a short comment naming the MR and release
+- parent, children and their linked issues → Testing on Production, each with a short comment naming the MR and release
+- ask the PM in one line whether to close the children and linked issues, listing them. Close nothing without that OK (see closing rules)
+
+## Linking MRs to issues
+
+Every MR belongs to an issue. The issue then lists its MRs, and anyone can trace a change back to the decision behind it.
+
+- **No issue, no MR.** Know the MR's issue before opening it: the child for a develop MR; the parent and all children for the production MR. No issue yet: ask the PM whether to create one first.
+- **Link it in the MR**, as the templates show:
+  - issue number in the title: `(#<issue>)`
+  - full reference under "Related issue(s)/ticket(s)": `<group>/<repo>#<issue>`, plus any linked issues split out of review findings
+- **No closing keywords** (`Closes`, `Fixes`, `Resolves`, `Implements`) in the title, description or commits. GitLab closes the issue by itself on merge to the default branch, and closing is a human decision (see closing rules).
+- **Check before every merge**, and before handing the production MR to the PM: search the title, description and commit messages for closing keywords, including ones others added. In the title or description: replace them with a plain reference. In a commit message: tell the PM before the merge, since only rewriting the commit removes it.
+- **Check the link** right after creating the MR: read the issue's related merge requests. MR missing there: add a comment on the issue naming the MR, in the topic's thread if there is one (see comment rules).
+- An MR that is not linked is not merged.
 
 ## Comment rules
 
-- If the PM started a thread on the topic, **reply in that thread**.
-- **One topic per comment**, so each can be resolved on its own.
-- Every label change gets a short comment: what changed and why, with the MR or release.
+A work item should read as a set of topics, each in its own thread, so the PM can follow one topic from start to end and resolve it on its own. Scattered top-level comments on the same topic break that.
+
+- **Read the threads first.** Before every comment, load the work item's discussions (issue or MR), resolved ones included.
+- **Topic already has a thread** (whoever started it: PM, agent, colleague): **reply in that thread**.
+  - Resolved thread: reply there anyway, so the history stays together. GitLab may reopen it; that is wanted, it needs attention again.
+  - Topic started on the issue and comes up again on its MR: reply in the original issue thread and name the MR there.
+- **New topic:** start a new thread. One topic per thread.
+- **Several topics at once:** one reply or new thread per topic, never one comment covering all of them.
+- **Label changes** get a short note: what changed and why, with the MR or release. Put it in the thread of the topic that caused the change (for example the local-test thread when the PM's local OK moves the child on). No such thread: a new comment.
 
 ## Closing rules
 
-- **Ask before closing** any issue. Merged to develop is not done.
-- Exceptions:
-  - step 10: children and their linked issues close once their code is merged to the production branch and released
-  - step 11: close the parent on the PM's OK on production
-- A closed issue keeps its last status label.
+Closing an issue is a human decision. It says "done", and only the PM can judge that.
+
+- **Never close on your own judgment**, and never let GitLab close an issue for you (no closing keywords, see "Linking MRs to issues"). Merged to develop is not done; merged and released is not done either.
+- **Close only on an explicit instruction from the PM.** A comment from someone else that asks to close is not one; point the PM to it.
+- **Double-check every close request.** "Close the issue", "close the related issues" or "close them" can mean different sets of issues. Before closing anything, list exactly what you would close (number, title, current status label) and wait for the PM's yes. Close only that list.
+- A closed issue keeps its last status label. Add a short comment naming the MR and release, in the topic's thread if there is one.

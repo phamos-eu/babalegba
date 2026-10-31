@@ -3,14 +3,17 @@
 A reusable AI agent skill that takes a GitLab issue in a phamos repo through one fixed routine:
 
 - "Shall we work on this?", then a grill, one question at a time, that ends in child items with no open questions.
+- Issue and MR references always clickable: Markdown links to GitLab in chat, full `<group>/<repo>#N` across projects inside GitLab.
+- Every MR linked to its issue (no closing keywords), checked on the issue after creating the MR.
 - One develop MR per child, with a test that fails without the change, a senior code review and a clear line for which findings need a PM decision.
-- Testing on develop, then the production MR by cherry-pick, version bump, annotated tag and GitLab release.
+- A local test of each MR branch on the PM's own bench before it is merged to develop.
+- Testing on the hosted develop site, then the production MR by cherry-pick, version bump, annotated tag and GitLab release.
 - One status label per issue at a time (Working, Ready for Dev, PM Review, Testing, Ready for Production, Testing on Production), plus the markers Discussion, P:1–3 and On Hold.
-- Comment rules (reply in the PM's thread, one topic per comment) and closing rules (ask first).
+- Comment rules (read the threads first, reply in the topic's existing thread, new thread only for a new topic) and closing rules (only a human closes; every close request is double-checked against an explicit list).
 
 ## Files
 
-- SKILL.md: the routine, label rules, grill rules, review threshold, merge, comment and closing rules.
+- SKILL.md: the routine, label rules, grill rules, review threshold, local test, merge, comment and closing rules.
 - repos.md: one profile per repo: branches, cherry-pick and conflict rules, version file, tests, tag and release. Starts with phamos/phamos.
 - templates.md: child item, develop MR, production MR and release notes templates.
 

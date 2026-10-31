@@ -45,6 +45,20 @@ PYTHONPATH=<worktree> bench --site dev.localhost run-tests --module <module>
 
 Say in the MR that the site schema comes from the local integration branch, so this is not a `bench migrate` on a `version-15` site.
 
+**Local bench** (for the PM's local test, step 5b)
+- bench folder on the PM's Mac: `<ask the PM once, then fill in>`
+- site: `dev.localhost`
+- app folder: `apps/phamos`
+- after switching the branch:
+
+  ```bash
+  bench --site dev.localhost migrate
+  bench build --app phamos
+  bench --site dev.localhost clear-cache
+  ```
+
+- after the PM's OK: switch `apps/phamos` back to the branch it was on and run the three commands again
+
 **Tag**
 - annotated tag `v15.X.Y` on the `version-15` merge commit, message `Version 15.X.Y`:
 
