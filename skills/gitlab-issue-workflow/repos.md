@@ -72,6 +72,13 @@ Say in the MR that the site schema comes from the local integration branch, so t
 - tag: `v15.X.Y`; title: leave blank (GitLab uses the tag)
 - notes: release notes template in `templates.md`, with a `## Deploy` section and an `MRs:` line
 
+**GitHub release**
+- GitLab push-mirrors to `github.com/phamos-eu/phamos` (public). Copy each release there after the tag has arrived:
+
+  ```bash
+  python3 -I scripts/gitlab-release-to-github.py phamos/phamos phamos-eu/phamos v15.X.Y
+  ```
+
 **Templates to follow**
 - develop MR: !999
 - version-15 MR: !997, !1003, !1005
