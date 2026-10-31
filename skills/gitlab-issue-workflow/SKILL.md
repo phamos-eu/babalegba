@@ -65,7 +65,7 @@ Labels not in these lists (for example "Ready for Staging", "Ready for Release",
 | 7. All children merged | **Testing**. PM: "please deploy the hosted develop site", then tests there | — | PM deploys and tests |
 | 8. PM's OK | **Ready for Production** | **Ready for Production** | PM |
 | 9. Production MR | Cherry-pick every child's develop merge in order, version bump, assigned to the PM, senior review | — | agent; PM merges |
-| 10. After the PM's merge | **Testing on Production**; annotated tag + GitLab release | **Testing on Production**; ask the PM whether to close them | agent; PM decides on closing |
+| 10. After the PM's merge | **Testing on Production**; annotated tag + GitLab release (+ GitHub release if mirrored) | **Testing on Production**; ask the PM whether to close them | agent; PM decides on closing |
 | 11. PM's OK on production | PM closes it, or tells the agent to | — | PM |
 
 A small issue with no children runs the child column on the issue itself.
@@ -161,6 +161,13 @@ Follow the repo profile in `repos.md`: branch name, cherry-pick command, conflic
 After the PM's merge:
 - annotated tag on the merge commit, as the profile says
 - GitLab release from the release notes template
+- repo with a GitHub mirror (see the profile): create the same release on GitHub. Push mirrors copy tags, never releases, so without this GitHub keeps showing an old release as Latest. Once the mirror has pushed the tag:
+
+  ```bash
+  python3 -I scripts/gitlab-release-to-github.py <group>/<repo> <github-owner>/<repo> <tag>
+  ```
+
+  It keeps the title and notes, turns `#N` and `!N` into GitLab links (on GitHub they would point at unrelated GitHub issues), puts `@user` in backticks so no GitHub account gets pinged, and marks the newest release Latest.
 - parent, children and their linked issues → Testing on Production, each with a short comment naming the MR and release
 - ask the PM in one line whether to close the children and linked issues, listing them. Close nothing without that OK (see closing rules)
 
