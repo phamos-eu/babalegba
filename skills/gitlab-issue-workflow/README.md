@@ -3,6 +3,7 @@
 A reusable AI agent skill that takes a GitLab issue in a phamos repo through one fixed routine:
 
 - "Shall we work on this?", then a grill, one question at a time, that ends in child items with no open questions.
+- Issue and MR references always clickable: Markdown links to GitLab in chat, full `<group>/<repo>#N` across projects inside GitLab.
 - Every MR linked to its issue (no closing keywords), checked on the issue after creating the MR.
 - One develop MR per child, with a test that fails without the change, a senior code review and a clear line for which findings need a PM decision.
 - A local test of each MR branch on the PM's own bench before it is merged to develop.

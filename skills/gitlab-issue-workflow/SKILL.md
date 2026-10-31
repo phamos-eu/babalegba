@@ -22,6 +22,10 @@ Issues, MRs, comments and release notes:
 - lists over long paragraphs
 - name the code (files, functions) and the MRs and issues by reference
 
+**Issue and MR references are always clickable**, so the PM can open them in one click:
+- **In chat with the PM:** never a bare `#45` or `!12`. Write a Markdown link to the GitLab page, labelled with the full reference: `[phamos/phamos#45](https://git.phamos.eu/phamos/phamos/-/issues/45)`, `[phamos/phamos!12](https://git.phamos.eu/phamos/phamos/-/merge_requests/12)`. Use the host from the repo profile.
+- **Inside GitLab** (issues, MRs, comments, release notes): GitLab links references itself. `#45` and `!12` work within the same project; for another project use the full `<group>/<repo>#45`.
+
 ## Labels
 
 **Status labels.** An issue has exactly one at a time:
