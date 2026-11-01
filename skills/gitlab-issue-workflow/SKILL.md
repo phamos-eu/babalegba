@@ -15,6 +15,8 @@ Before you start in a repo, read its profile in `repos.md`. A repo without a pro
 
 Templates for child items, MRs and release notes are in `templates.md`.
 
+**Source of truth.** This skill lives in `git.phamos.eu/phamos/babalegba`, folder `skills/gitlab-issue-workflow`, branch `main`. A local copy (for example a skill library, which only updates SKILL.md) can lag behind. So read `repos.md`, `templates.md` and any script in `scripts/` from there through the GitLab tools, not from the local folder. To run a script, fetch it into a scratch folder first. Use the local file only when GitLab can't be reached, and tell the PM it may be out of date.
+
 ## Writing style
 
 Issues, MRs, comments and release notes:

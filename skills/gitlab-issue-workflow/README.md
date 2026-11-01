@@ -27,4 +27,6 @@ This skill is deliberately stored as plain Markdown so it can be consumed by any
 - One-off usage: paste the content of SKILL.md into the conversation or prompt, together with the repo's profile from repos.md.
 - Vibe (Mistral Work): copy this folder to the Vibe skills directory so it becomes a first-party selectable skill.
 
+SKILL.md tells the agent to read repos.md, templates.md and scripts/ from this folder on main, so copies that only carry SKILL.md (such as a skill library) still use the latest versions.
+
 Keep this repository folder as the source of truth; update the skill here first, then propagate copies to the individual environments.
