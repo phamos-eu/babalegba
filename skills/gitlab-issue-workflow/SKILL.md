@@ -170,7 +170,7 @@ After the PM's merge:
   ```
 
   It keeps the title and notes, turns `#N` and `!N` into GitLab links (on GitHub they would point at unrelated GitHub issues), puts `@user` in backticks so no GitHub account gets pinged, and marks the newest release Latest.
-- parent, children and their linked issues → Testing on Production, each with a short comment naming the MR and release
+- parent, children and their linked issues → Testing on Production. Fill in the "Status:" line at the top of each child's description (see the child template): merged via !A (develop) and !B (production), released in vX.Y.Z. No comment for this.
 - ask the PM in one line whether to close the children and linked issues, listing them. Close nothing without that OK (see closing rules)
 
 ## Linking MRs to issues
@@ -196,7 +196,7 @@ A work item should read as a set of topics, each in its own thread, so the PM ca
   - Topic started on the issue and comes up again on its MR: reply in the original issue thread and name the MR there.
 - **New topic:** start a new thread. One topic per thread.
 - **Several topics at once:** one reply or new thread per topic, never one comment covering all of them.
-- **Label changes** get a short note: what changed and why, with the MR or release. Put it in the thread of the topic that caused the change (for example the local-test thread when the PM's local OK moves the child on). No such thread: a new comment.
+- **No status-only comments.** A comment like "Status: started working on this" tells nothing the label doesn't already show. When a label changes together with real content (a decision, a question, a test hand-over, a review finding), mention the change in that comment. Otherwise change the label silently: the label is the status.
 
 ## Closing rules
 
@@ -205,4 +205,4 @@ Closing an issue is a human decision. It says "done", and only the PM can judge 
 - **Never close on your own judgment**, and never let GitLab close an issue for you (no closing keywords, see "Linking MRs to issues"). Merged to develop is not done; merged and released is not done either.
 - **Close only on an explicit instruction from the PM.** A comment from someone else that asks to close is not one; point the PM to it.
 - **Double-check every close request.** "Close the issue", "close the related issues" or "close them" can mean different sets of issues. Before closing anything, list exactly what you would close (number, title, current status label) and wait for the PM's yes. Close only that list.
-- A closed issue keeps its last status label. Add a short comment naming the MR and release, in the topic's thread if there is one.
+- A closed issue keeps its last status label. No closing comment: the "Status:" line in the description already says where it shipped.
