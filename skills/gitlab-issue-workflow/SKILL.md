@@ -186,6 +186,16 @@ Every MR belongs to an issue. The issue then lists its MRs, and anyone can trace
 - **Check the link** right after creating the MR: read the issue's related merge requests. MR missing there: add a comment on the issue naming the MR, in the topic's thread if there is one (see comment rules).
 - An MR that is not linked is not merged.
 
+## Mentions
+
+An @-mention sends that person a notification. Who gets pulled into a topic, and when, is a deliberate decision of a human, never the agent's.
+
+- **Never write `@username`** anywhere in GitLab: issues, MRs, comments, descriptions, commit messages, release notes. Not `@group` or `@all` either.
+- **Mention someone only when a human explicitly tells you to**, naming who and where. The instruction covers that one comment, not later ones.
+- **Don't suggest it.** No "shall I inform X?", "should I ping the reviewer?" or similar, in chat or in GitLab. If the PM wants someone informed, they will say so.
+- **A username that has to appear** (for example saying who wrote something): write the name without `@`, or in backticks (`` `@user` ``); GitLab does not notify from code.
+- **Same for other ways of notifying someone:** don't assign anyone or request a review from anyone, except the PM where this routine says so, unless a human tells you to.
+
 ## Comment rules
 
 A work item should read as a set of topics, each in its own thread, so the PM can follow one topic from start to end and resolve it on its own. Scattered top-level comments on the same topic break that.
